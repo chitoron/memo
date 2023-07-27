@@ -1,0 +1,67 @@
+<html> 
+<head> 
+  <style>
+    #map {
+      height: 100%;
+      width: 100%;
+    }
+  </style>
+  <!-- タスクのlan lodをもらう -->
+  <script src="https://maps.googleapis.com/maps/api/js?key={{ api_key }}&callback=initMap&v=weekly" defer></script>
+
+  <script>
+  function initMap() {
+    var lon = document.getElementsByClassName('lon');
+    var lat = document.getElementsByClassName('lat');
+    var task =document.getElementsByClassName('task');
+    var lonValues = [];
+    var latValues = [];
+    var taskValues = [];
+    //情報をもらってきている
+    for (var i = 0; i < lon.length; i++) {
+      var a = parseFloat(lon[i].value);
+      lonValues.push(a);
+    }
+    for(var i = 0;i < lat.length;i++){
+      var b = parseFloat(lat[i].value)
+      latValues.push(b)
+    }
+    for(var i = 0;i <task.length;i++){
+      taskValues.push(task[i].value)
+    }
+    console.log(taskValues)
+    var latlng = new google.maps.LatLng(latValues[0],lonValues[0]); 
+    var mapOptions = {
+        center:latlng,  // 初期表示位置の緯度経度
+        zoom: 6, // ズームレベ
+      };
+    var map = new google.maps.Map(document.getElementById("map"), mapOptions);
+    for(var i = 0;i < lat.length;i++){
+      var ab= new google.maps.LatLng(latValues[i],lonValues[i]); 
+      var marker = new google.maps.Marker({
+       position: ab,
+       map: map,
+      })
+      const infowindow = new google.maps.InfoWindow({
+        content: "<h3>"+taskValues[i]+"</h3>"
+      });
+      marker.addListener("click", function() {
+        infowindow.open(map, this);
+      });
+    }
+  }
+
+  
+  </script>
+</head> 
+<body> 
+  <a href="./">戻る</a>
+  {% for task in tasks %}
+  <input class="lon" type="hidden" name="task" value="{{task['lon']}}">
+  <input class="lat" type="hidden" name="task" value="{{task['lat']}}">
+  <input class="task" type="hidden" name="task" value="{{task['task_name']}}">
+  {% endfor %}
+    <div id="map"></div>
+
+</body> 
+</html>

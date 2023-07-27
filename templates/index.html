@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="jp">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>フォームページ</title>
+    <style>
+    form{
+        display: inline;
+    }
+    </style>
+<script>
+    window.onload = function () {
+        document.getElementById("submit").style.visibility ="hidden"
+        navigator.geolocation.getCurrentPosition(test2);
+}
+function test2(position) {
+    var lat = position.coords.latitude;
+    var lon = position.coords.longitude;
+    const apiKey = "{{ api_key }}";
+    const latitude = lat;
+    const longitude = lon;
+    getAddressFromCoordinates(apiKey, latitude, longitude);
+}
+function getAddressFromCoordinates(apiKey, latitude, longitude) {
+	const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${apiKey}`;;
+        // APIリクエストを送信
+        fetch(url)
+        .then(response => response.json())
+        .then(data => {
+            const address = data.results;
+            var adc=address.length-2;
+            var address1=data.results[adc].address_components[0].long_name;
+            var live=document.getElementById("live");
+            var lons=document.getElementById('longitude');
+            var lats=document.getElementById('latitude');
+            live.value=address1;
+            console.log(data.results)
+            lons.value=longitude;
+            lats.value=latitude;
+            document.getElementById("submit").style.visibility ="visible"
+	})
+}
+function realtime2() {
+    
+		var now = new Date();
+		var y = now.getFullYear();
+		var m = now.getMonth() + 1;
+		var d = now.getDate();
+		target = document.getElementById('day');
+		day.value = y + '年' + m + '月' + d + '日';
+	}
+	setInterval('realtime2()',1000);
+</script>
+</head>
+<body>
+    <a href="./map">map</a>
+    <form method="GET" action="/search">
+        <select name="search">
+            <option value="null">都道府県全選択</option>
+            {% for live in lives %}
+            <option value="{{live.live}}">{{ live.live }}</option>
+            {% endfor %}
+        </select>
+        <select name="search1">
+            <option value="null">日付全選択</option>
+            {% for day in days %}
+            <option value="{{day.day}}">{{day.day}}</option>
+            {% endfor %}
+        </select>
+        <input type="submit" value="search">
+    </form>
+    <ul>
+        {% for task in tasks %}
+        <li>
+            <form method="post" action="/edit">
+                <input type="text" name="task" value="{{task['task_name']}}">
+                <input type="hidden" name="task_id" value="{{task['id']}}">{{task['live_name']}}
+                <select name="category_id">
+                    {% for category in categories %}
+                    <option value="{{category.id}}"
+                        {% if task.category_id == category.id %}
+                            selected
+                        {% endif %}
+                        >
+                        {{category.category_name}}</option>
+                    {% endfor %}
+                
+                </select>
+                <input type="submit" value="編集">
+            </form>
+            <form method="post" action="/finish">
+                <input type="hidden" name="task_id" value="{{task['id']}}">
+                <input type="submit" value="削除">
+            </form>
+        </li>
+        {% endfor %}
+    </ul>
+
+    <form method="post" action="/">
+        <input type="text" name="task" placeholder="内容">
+        <input type="hidden" name="live" id="live" value="">
+        <input type="hidden" name="latitude" id="latitude" value="">
+        <input type="hidden" name="longitude" id="longitude" value="">
+        <input type="hidden" name="day" id="day" value="">
+        <select name="category_id">
+            {% for category in categories %}
+            <option value="{{category.id}}">{{category.category_name}}</option>
+            {% endfor %}
+        </select>
+        <input type="submit" id="submit" value="送信">
+    </form>
+    <p></p>
+    <form method="post" action="/tuika">
+        <input type="text" name="category" placeholder="カテゴリー">
+        <input type="submit" id="submit" value="送信">
+    </form>
+</body>
+</html>
