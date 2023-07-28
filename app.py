@@ -114,10 +114,23 @@ def tuika():
 	try:
 		db = get_db()
 		a = request.form['category']
-		print(a)
 		with db:
-			db.execute('INSERT INTO category (category_name) VALUES (?)', (a,))
+			db.execute('INSERT INTO category (category_name) VALUES (?) ON CONFLICT (category_name) DO NOTHING', (a,))
 		return redirect('/')
 	finally:
 		db.close()	
 	return redirect('/')
+
+@app.route('/sakuzyo',methods=['POST'])
+def sakuzyo():
+	try:
+		db = get_db()
+		a = request.form['gomi']
+		if a!='null':
+			with db:
+				db.execute('DELETE FROM category WHERE id=?',(a,))
+
+
+		return redirect('/')
+	finally:
+		db.close()

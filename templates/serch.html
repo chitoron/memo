@@ -8,13 +8,15 @@
 </head>
 <body>
 	<a href="./">戻る</a>
-
+	<h1>検索結果</h1>
+	{{ tasks ['day_time']}}
 	<ul>
 		{% for task in tasks %}
 		<li>
-			<p>{{task['task_name']}},{{task['live_name']}}</p>
+			<p>日付:{{ task ['day']}}</p>
+			<p>内容:{{task['task_name']}}</p>
+			<p>場所:{{task['live']}}</p>
 		</li>
-		<p>{{task['day_time']}}</p>
 		{% endfor %}
 	    </ul>
 </body>

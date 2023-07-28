@@ -113,7 +113,17 @@ function realtime2() {
     <p></p>
     <form method="post" action="/tuika">
         <input type="text" name="category" placeholder="カテゴリー">
-        <input type="submit" id="submit" value="送信">
+        <input type="submit" id="submit" value="追加">
+    </form>
+    <p></p>
+    <form method="post" action="/sakuzyo" >
+        <select name="gomi">
+            <option value="null">カテゴリー削除ボタン</option>
+            {% for category in categories %}
+            <option value="{{category.id}}">{{category.category_name}}</option>
+            {% endfor %}
+        </select>
+        <input type="submit" value="削除">
     </form>
 </body>
 </html>
