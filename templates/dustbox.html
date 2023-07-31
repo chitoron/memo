@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	<title>Document</title>
+	    <style>
+    form{
+        display: inline;
+    }
+    </style>
+    <script>
+    function confirmSubmit() {
+        return window.confirm('本当にフォームを送信してもよろしいですか？');
+        }
+    </script>
+</head>
+<body>
+	<h1>ゴミ箱</h1><a href="./">戻る</a>
+	{% for task in tasks %}
+	<li>
+		<form method="post" action="/returnn">
+		    <input type="hidden" name="task_id" value="{{task['id']}}">{{task['live']}}{{task['day']}}{{task['furu']}}{{task['task_name']}}
+		    <input type="submit" value="戻す">
+		</form>
+		<form method="post" action="/realedit" onsubmit="return confirmSubmit();">
+			<input type="hidden" name="task_id" id="task_id" value="{{task['id']}}">
+			<input type="submit" value="削除">
+		</form>      
+	</li>
+	{% endfor %}
+
+</body>
+</html>

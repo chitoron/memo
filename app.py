@@ -7,10 +7,6 @@ api_key = os.getenv('API_KEY')
 
 app = Flask(__name__, static_folder='static', static_url_path='' )
 
-if __name__=='__main__':
-    app.run(port=3000)
-    app.run(debug=True)
-
 tasks = []
 
 #データベースに繋ぐ
@@ -45,8 +41,9 @@ def index():
 			lon=request.form['longitude']
 			lat=request.form['latitude']
 			day=request.form['day']
+			furu=request.form['furu']
 			with db:
-				db.execute('INSERT INTO task (task_name, category_id, live, lon, lat, day) VALUES (?, ?, ?, ?, ?, ?)', (task, category_id, live, lon, lat, day,))
+				db.execute('INSERT INTO task (task_name, category_id, live, lon, lat, day,furu) VALUES (?, ?, ?, ?, ?, ?, ?)', (task, category_id, live, lon, lat, day, furu,))
 				return redirect('/')
 		return render_template('index.html',tasks=tasks,categories=categories,lives=lives,days=days,api_key=api_key,)
 	finally:
@@ -59,6 +56,7 @@ def finish():
 		db=get_db()
 		task_id=int(request.form['task_id'])
 		with db:
+			db.execute('INSERT INTO tasks (id, category_id, day, live, furu, task_name, lon ,lat) SELECT id, category_id, day, live, furu, task_name, lon ,lat FROM task WHERE id = ?',(task_id,))
 			db.execute('DELETE FROM task WHERE id=?',(task_id,))
 		return redirect('/')
 	finally:
@@ -86,6 +84,20 @@ def map():
 			tasks = db.execute('SELECT * FROM task').fetchall()
 
 		return render_template('map.html', tasks=tasks,api_key=api_key)
+	finally:
+		db.close()
+@app.route('/dustbox',methods=['GET', 'POST'])
+def dustbox():
+	try:
+		db = get_db()
+		with db:
+			categories = db.execute('SELECT * FROM category').fetchall()
+			tasks=db.execute('SELECT * FROM tasks').fetchall()
+		if request.method == 'POST':
+			with db:
+				db.execute('INSERT INTO tasks (id, category_id, day, live, furu, task_name, lon ,lat) SELECT id, category_id, day, live, furu, task_name, lon ,lat FROM task WHERE id = ?',(task_id,))
+			return render_template('dustbox.html')
+		return render_template('dustbox.html',tasks=tasks,categories=categories)
 	finally:
 		db.close()
 @app.route('/search',methods=['GET'])
@@ -129,8 +141,27 @@ def sakuzyo():
 		if a!='null':
 			with db:
 				db.execute('DELETE FROM category WHERE id=?',(a,))
-
-
 		return redirect('/')
+	finally:
+		db.close()
+@app.route('/returnn',methods=['POST'])
+def returnn():
+	try:
+		db=get_db()
+		task_id=int(request.form['task_id'])
+		with db:
+			db.execute('INSERT INTO task (id, category_id, day, live, furu, task_name, lon ,lat) SELECT id, category_id, day, live, furu, task_name, lon ,lat FROM tasks WHERE id = ?',(task_id,))
+			db.execute('DELETE FROM tasks WHERE id=?',(task_id,))
+			return redirect('/dustbox')
+	finally:
+		db.close()
+@app.route('/realedit',methods=['POST'])
+def realedit():
+	try:
+		db=get_db()
+		task_id=int(request.form['task_id'])
+		with db:
+			db.execute('DELETE FROM tasks WHERE id=?',(task_id,))
+			return redirect('/dustbox')
 	finally:
 		db.close()
